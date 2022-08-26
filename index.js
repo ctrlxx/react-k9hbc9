@@ -16,6 +16,7 @@ const data = {
         unknown: 25,
       },
       comboId: 'A',
+      date: 20200102,
     },
     {
       id: 'person B',
@@ -26,6 +27,7 @@ const data = {
         unknown: 5,
       },
       comboId: 'A',
+      date: 20200103,
     },
     {
       id: 'person C',
@@ -36,6 +38,7 @@ const data = {
         unknown: 25,
       },
       comboId: 'A',
+      date: 20200104,
     },
     {
       id: 'person D',
@@ -46,6 +49,7 @@ const data = {
         unknown: 15,
       },
       comboId: 'B',
+      date: 20200104,
     },
     {
       id: 'person E',
@@ -56,6 +60,7 @@ const data = {
         unknown: 45,
       },
       comboId: 'B',
+      date: 20200105,
     },
     {
       id: 'person F',
@@ -65,6 +70,7 @@ const data = {
         outcome: 110,
         unknown: 15,
       },
+      date: 20200106,
     },
   ],
   edges: [
@@ -111,7 +117,7 @@ data.nodes.forEach((node) => {
       break;
     default:
       node.style = {
-        fill: '#FDE1CE',
+        fill: '#000000',
         stroke: '#aaa',
       };
       break;
@@ -186,7 +192,7 @@ const legend = new G6.Legend({
 
 const timeBarData = [];
 
-for (let i = 1; i < 60; i++) {
+for (let i = 1; i < 10; i++) {
   const month = i < 30 ? '01' : '02';
   const day = i % 30 < 10 ? `0${i % 30}` : `${i % 30}`;
   timeBarData.push({
@@ -197,7 +203,7 @@ for (let i = 1; i < 60; i++) {
 
 const width = document.getElementById('container').scrollWidth;
 const height = document.getElementById('container').scrollHeight || 500;
-
+const nodeSize = 20;
 let count = 0;
 const timebar = new G6.TimeBar({
   x: 0,
@@ -232,13 +238,42 @@ const timebar = new G6.TimeBar({
   },
 });
 
+const constrainBox = { x: 10, y: 10, width: 580, height: 450 };
+
+const onTick = () => {
+  let minx = 99999999;
+  let maxx = -99999999;
+  let miny = 99999999;
+  let maxy = -99999999;
+  data.nodes.forEach((node) => {
+    if (minx > node.x) {
+      minx = node.x;
+    }
+    if (maxx < node.x) {
+      maxx = node.x;
+    }
+    if (miny > node.y) {
+      miny = node.y;
+    }
+    if (maxy < node.y) {
+      maxy = node.y;
+    }
+  });
+  const scalex = (constrainBox.width - nodeSize / 2) / (maxx - minx);
+  const scaley = (constrainBox.height - nodeSize / 2) / (maxy - miny);
+  data.nodes.forEach((node) => {
+    node.x = (node.x - minx) * scalex + constrainBox.x;
+    node.y = (node.y - miny) * scaley + constrainBox.y;
+  });
+};
+
 const graph = new G6.Graph({
   container: 'container',
   width,
   height,
   // translate the graph to align the canvas's center, support by v3.5.1
   fitCenter: true,
-  plugins: [legend, timebar],
+  plugins: [timebar, legend],
   modes: {
     default: ['drag-canvas', 'drag-node', 'drag-combo'],
   },
@@ -248,6 +283,8 @@ const graph = new G6.Graph({
     linkDistance: 200,
     sortByCombo: true,
     unitRadius: 200,
+    onTick,
+    preventOverlap: true,
   },
   defaultEdge: {
     style: {
