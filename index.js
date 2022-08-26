@@ -195,6 +195,9 @@ for (let i = 1; i < 60; i++) {
   });
 }
 
+const width = document.getElementById('container').scrollWidth;
+const height = document.getElementById('container').scrollHeight || 500;
+
 let count = 0;
 const timebar = new G6.TimeBar({
   x: 0,
@@ -229,8 +232,6 @@ const timebar = new G6.TimeBar({
   },
 });
 
-const width = document.getElementById('container').scrollWidth;
-const height = document.getElementById('container').scrollHeight || 500;
 const graph = new G6.Graph({
   container: 'container',
   width,
